@@ -58,12 +58,48 @@ body {
 
 table.board td {
     width: 80px;
-    line-height: 40px;
+    line-height: 48px;
     margin: 0px;
-    padding: 20px 0px;
+    padding: 16px 0px;
     border: 1px #ddd solid;
     text-align: center;
+    
 }
+
+.board td {
+    cursor: default;
+}
+
+.board .figure {
+    cursor: default;
+    display: block;
+    
+    width: 48px;
+    margin: 0px 16px;
+    border-radius: 6px;
+}
+
+.king {
+    background: #ED4C74;
+}
+
+.assassin {
+    background: #EB6F3B;
+}
+
+.person {
+    background: #aaa;
+}
+
+.guard {
+    background: #619EED;
+}
+
+.hidden-assassin {
+    background: #BA9C7B;
+}
+
+
 
 .rooftop {
     background: #E8D2A9;
@@ -82,6 +118,12 @@ table.board td {
 }
 #my-turn-indicator {
      animation: blink 1s linear infinite;
+    -webkit-animation: blink 1s linear infinite;
+    -moz-animation: blink 1s linear infinite;
+}
+
+.figure.selected {
+    animation: blink 1s linear infinite;
     -webkit-animation: blink 1s linear infinite;
     -moz-animation: blink 1s linear infinite;
 }

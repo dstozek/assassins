@@ -19,6 +19,78 @@ var MY_NICK = null;
 
 var rules = null;
 
+var state = null;
+
+var selectedUnit = null;
+
+var my_turn = false;
+
+var is_my_unit = function(unit) {
+    if (unit.type=='p') {
+            
+            return MY_IDX == 1;
+            
+    } else {
+            return MY_IDX == 0;
+    }
+}
+
+var onBoardClicked = function(row, col) {
+    if (!state) return;
+    if (!my_turn) return;
+    // find selected unit
+    var allUnits = _.union(state.guards, state.people, [state.king]);
+    var unit = _.find(allUnits, function(f) {
+        return f.x == col && f.y == row;
+    });
+    
+    if (unit === selectedUnit) return;
+
+
+    if (selectedUnit) {
+        
+        if (unit && is_my_unit(unit)) {
+            // just change selection
+            $('#board-'+selectedUnit.y+'-'+selectedUnit.x+' .figure').removeClass('selected');
+        } else {
+            
+            // make a move!
+            socket.emit('move', {
+                old_row: selectedUnit.y,
+                old_col: selectedUnit.x,
+                row: row,
+                col: col
+                
+            });
+            return;
+        }
+        
+    }
+
+
+    if (unit && !is_my_unit(unit)) {
+        return; 
+    }
+    
+    
+    if (unit) {
+        selectedUnit = unit;
+    } else {
+        selectedUnit = null;
+    }
+    
+    selectedUnit = unit;
+    
+    if (selectedUnit) {
+        $('#board-'+selectedUnit.y+'-'+selectedUnit.x+' .figure').addClass('selected');
+        $('#btn-uncover').prop('disabled', !(selectedUnit.assassin && !selectedUnit.uncovered));
+    }
+    
+    
+    
+    
+};
+
 socket.on('Game started', function(player_names, my_idx, r) {
     $('#lobby').hide();
     $('#game').show();
@@ -26,8 +98,14 @@ socket.on('Game started', function(player_names, my_idx, r) {
     rules = r;
     
     $('#btn-pass').click(function() {
-        socket.emit('move', null);
+        socket.emit('move', {pass: true});
     });
+    
+    
+    $('#btn-uncover').click(function() {
+        socket.emit('move', {uncover: true, row: -1, col: -1, old_row: selectedUnit.y, old_col: selectedUnit.x});
+    });
+    
     MY_IDX = my_idx;
     PLAYER_NAMES = player_names;
     
@@ -75,7 +153,10 @@ socket.on('Game started', function(player_names, my_idx, r) {
                 cls = "finish";
             }
             
-            rowElement.append('<td class="'+cls+'" id="board-'+row+'-'+col+'">&nbsp;</td>');
+            var td = $('<td class="'+cls+'" id="board-'+row+'-'+col+'">&nbsp;</td>');
+            
+            rowElement.append(td);
+            td.click(_.partial(onBoardClicked, row, col));
         }
     }
     
@@ -87,13 +168,17 @@ socket.on('Game started', function(player_names, my_idx, r) {
     //PLAYER_DIVS[n].find("[data-resource=food]")
 });
 
+
+
 socket.on('Game over', function() {
     $('#game').hide();
     $('#gameover').show();
 });
 
-socket.on('game state', function(state) {
-    console.log("Game state received!", state);
+socket.on('game state', function(s) {
+    
+    
+    state = s;
     
     // clear board
     for (var row=0; row < rules.map.length; row++) {
@@ -103,24 +188,34 @@ socket.on('game state', function(state) {
     }
     
     _(state.guards).each(function(g) {
-        $('#board-'+g.y+'-'+g.x).html("G");
+        $('#board-'+g.y+'-'+g.x).html('<span class="figure guard">G</span>');
     });
     
     _(state.people).each(function(p) {
         var e = $('#board-'+p.y+'-'+p.x);
         
-        var c = "P";
+        var c = '<span class="figure person">P</span>';
         if (p.assassin) {
             if (p.uncovered) {
-                c = "A";
+                c = '<span class="figure assassin">A</span>';
             } else {
-                c = "P(A)";
+                c = '<span class="figure hidden-assassin">P(A)</span>';
             }
         }
         e.html(c);
     });
     
-    $('#board-'+state.king.y+'-'+state.king.x).html("K");
+    $('#board-'+state.king.y+'-'+state.king.x).html('<span class="figure king">K</span>');
+    selectedUnit = null;
+    
+    $('#king-actions-data').html(state.king_actions);
+    $('#guard-actions-data').html(state.guard_actions);
+    $('#people-actions-data').html(state.people_actions);
+    if (state.can_arrest) {
+        $('#can-arrest-data').html("Citizens can be arrested this turn!");
+    } else {
+        $('#can-arrest-data').html("");
+    }
     
 });
 
@@ -217,12 +312,19 @@ socket.on('activate card', function(card_id) {
 
 socket.on('turn', function(player_id) {
     console.log("It's player "+player_id+"'s turn now.");
+    if(selectedUnit) {
+        $('#board-'+selectedUnit.y+'-'+selectedUnit.x+' .figure').removeClass('selected');   
+    }
     if (player_id == MY_IDX) {
+        my_turn = true;
         $("#my-turn-indicator").fadeIn('fast');
         $("#other-turn-indicator").fadeOut('fast');
+        $('#btn-pass').prop('disabled', false);
     } else {
+        my_turn = false;
         $("#my-turn-indicator").fadeOut('fast');
         $("#other-turn-indicator").fadeIn('fast').text('Turn: ' + PLAYER_NAMES[player_id]);
+        $('#btn-pass').prop('disabled', true);
     }
 });
 

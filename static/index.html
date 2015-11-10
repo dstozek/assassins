@@ -43,8 +43,15 @@
       <span id="other-turn-indicator" class="label label-info" style="display: none;"></span>
 
       <h2>Board</h2>
+      <div>
+        King actions: <strong id="king-actions-data"></strong>
+        Guard actions: <strong id="guard-actions-data"></strong> | 
+        People actions: <strong id="people-actions-data"></strong>
+        <strong id="can-arrest-data"></strong>
+      </div>
         <div id="my-play"></div>
-        <button class="btn btn-primary" id="btn-pass">Pass turn</button>
+        <button class="btn btn-primary" id="btn-pass" style="margin-top: 24px">End Turn</button>
+        <button class="btn btn-primary" id="btn-uncover" style="margin-top: 24px" disabled="true">Uncover assassin</button>
       <div style="clear:both"></div>
       
       

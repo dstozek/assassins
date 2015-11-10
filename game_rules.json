@@ -15,5 +15,32 @@
         [1, 1, 0, 0, 0, 1, 1, 0, 0, 0],
         [1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
         [1, 1, 0, 0, 0, 0, 0, 0, 0, 0]
-    ]
+    ],
+    "action_costs":
+    {
+        "king": {
+            "move": 1
+        },
+        "guard": {
+            "move": 1,
+            "climb": 2,
+            "drop": 1,
+            "kill": 1,
+            "kill_person": 1
+            
+        },
+        "people": {
+            "move": 1,
+            "climb": 2,
+            "drop": 1
+        },
+        "assassin": {
+            "move": 1,
+            "climb": 1,
+            "drop": 0,
+            "kill": 1,
+            "kill_next": 2,
+            "kill_king": 2
+        }
+    }
 }
