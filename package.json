@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "express": "^4.10.4",
+    "socket.io": "^1.2.1",
+    "underscore": "^1.7.0"
+  },
+  "dev_dependencies": {
+    "mocha": "^2.0.1",
+    "chai": "^1.10.0"
+  }
+}

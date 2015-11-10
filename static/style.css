@@ -1,0 +1,81 @@
+body {
+    font-family: 'Noticia Text', serif;
+    font-size: 1.3em;
+    margin: 48px;
+    
+    background-image: url("/static/a/back.jpg");
+    background-size: cover;
+}
+
+.c1 {
+    background: white;
+}
+
+.active {
+    font-weight: bold;
+}
+
+.card {
+    float: left;
+    margin: 24px;    
+    cursor: pointer;
+    
+}
+.card-front {
+    border: 1px solid #777;
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: 1px 1px 8px rgba(0,0,0,0.5);
+    transition: transform 0.4s;
+}
+
+.card-back {
+    position: absolute;
+    padding: 12px;
+    width: 259px; margin-left: -20px;
+    height: 350px; margin-top: -225px;
+    border: 1px #ccc solid;
+    border-radius: 8px;
+    box-shadow: 12px 9px 52px 3px rgba(0,0,0,0.85);
+    background: #DFEFFF;
+    overflow-y: hidden;
+    z-index: 1;
+    
+}
+
+.hidden-card {
+    float: left;
+    width: 40px;
+    height: 60px;
+    background: #f44;
+    border: 1px #ccc solid;
+    margin: 6px;
+}
+
+.handovr {
+    clear: both;
+}
+
+#my-turn-indicator, #other-turn-indicator {
+    position: fixed;
+    top: 40px;
+    left: 40px;
+    font-size: 2em;
+  
+}
+#my-turn-indicator {
+     animation: blink 1s linear infinite;
+    -webkit-animation: blink 1s linear infinite;
+    -moz-animation: blink 1s linear infinite;
+}
+
+@keyframes blink {  
+  0% { opacity: 1.0; }
+  50% { opacity: 0.0; }
+  100% { opacity: 1.0; }
+}
+@-webkit-keyframes blink {
+  0% { opacity: 1.0; }
+  50% { opacity: 0.0; }
+  100% { opacity: 1.0; }
+}
