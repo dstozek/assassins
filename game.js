@@ -165,6 +165,11 @@ var Game = function(players, rules) {
             self.send_game_state(players[0], true);
             self.send_game_state(players[1], false);
             
+            if (self.is_win_condition()) {
+                return;
+            }
+        
+            
             return;
             
         }
@@ -200,6 +205,7 @@ var Game = function(players, rules) {
     
     self.is_win_condition = function() {
        
+       var winner = null;
        if (self.king.health <= 0) {
            winner = 1;
        }
@@ -209,11 +215,11 @@ var Game = function(players, rules) {
        }
        
        
-       if (winner) {
+       if (winner !== null) {
            // go to win state
            
             self.players.forEach(function(p) {
-                p.socket.emit('winner', self.players.indexOf(winner));
+                p.socket.emit('winner', winner);
             });
        
             self.whose_turn = -1;
