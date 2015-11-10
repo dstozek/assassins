@@ -12,9 +12,16 @@ var Game = function(players, rules) {
     
     var self = {
         players: players.slice(0),
-        
         whose_turn: null,
-        rules: rules || DefaultRules
+        rules: rules || DefaultRules,
+        map: null,
+        // list of people (including assasins)
+        people: null,
+        // list of guards
+        guards: null,
+        // king
+        king: {health: 2, x: 0, y: 0}
+        
     };
     
     
@@ -93,6 +100,27 @@ var Game = function(players, rules) {
         
     };
     
+    self.send_game_state = function(player, hideAssassins) {
+        
+        var state = {
+            people: self.people,
+            guards: self.guards,
+            king: self.king
+        }
+        
+        state = JSON.parse(JSON.stringify(state));
+        
+        if (hideAssassins) {
+            for (var i=0; i < state.people.length; i++) {
+                if (!state.people[i].uncovered) {
+                    state.people[i].assassin = false;
+                }
+            }
+        }
+        
+        player.socket.emit("game state", state);
+    }
+    
     
     players.forEach(function(p) {
         p.game = self;
@@ -104,11 +132,36 @@ var Game = function(players, rules) {
     });
     
     
-    // TODO: game state init
+    // game state init
+    
+    self.people = [];
+    for (var i=0; i < self.rules.people_positions.length; i++) {
+        self.people.push({x: self.rules.people_positions[i][0], y: self.rules.people_positions[i][1], assassin: false, uncovered: false});
+    }
+    
+    //  choose 3 assasins
+    _(_(self.people).sample(self.rules.assassin_count)).each(function(p) {
+        p.assassin = true;
+    });
+    
+    self.guards = [];
+    for (var i=0; i < self.rules.guard_positions.length; i++) {
+        self.guards.push({x: self.rules.guard_positions[i][0], y: self.rules.guard_positions[i][1], assassin: false, uncovered: false});
+    }
+    
+    
+    self.king.x = self.rules.king_position[0];
+    self.king.y = self.rules.king_position[1];
+    
+    self.send_game_state(players[0], true);
+    self.send_game_state(players[1], false);
+    
+    
     
     
     // officially start the game (players can make actions)
     self.pass_turn(0);
+    
     
     
     return self;

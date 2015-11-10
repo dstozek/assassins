@@ -17,11 +17,13 @@ var PLAYER_NAMES = [];
 var MY_IDX = null;
 var MY_NICK = null;
 
+var rules = null;
 
-
-socket.on('Game started', function(player_names, my_idx, rules) {
+socket.on('Game started', function(player_names, my_idx, r) {
     $('#lobby').hide();
     $('#game').show();
+    
+    rules = r;
     
     $('#btn-pass').click(function() {
         socket.emit('move', null);
@@ -30,32 +32,55 @@ socket.on('Game started', function(player_names, my_idx, rules) {
     PLAYER_NAMES = player_names;
     
     var res_init = function(container) {
-        rules.resources.forEach(function(resource) {
-            var r = $('<div>').text(resource.title + ": ").appendTo(container);
-            $('<span>').attr('data-resource', resource.id).appendTo(r);
-        });    
+            
     };
     
     player_names.forEach(function (p, i) {
-        if (i != my_idx) {
+        
             var d = $('<div>').appendTo($('#players-game'))
                 .addClass("list-group-item");
-                $('<h4>').text(p).appendTo(d);
-            PLAYER_DIVS[i] = d;
-            
-            PLAYER_DIVS[i].hand = $('<div class="hand">').appendTo(d);
-            $('<div class="handovr">').appendTo(d);
-            $('<div id="play-area-'+i+'">').appendTo(d);
-            $('<div class="handovr">').appendTo(d);
-            res_init(d);
-            
-            
+                
+         
+        var text = p;
         
+        if (i == my_idx) {    
+            text += ' (Me)';
         }
+        
+        if (i == 0) {
+            text += ' - King & The Guard';
+        } else {
+            text += ' - The Assassins & The People';
+        }
+        
+        $('<h4>').text(text).appendTo(d);
 
     });
     
+    
+    var boardElement = $('<table class="board">');
+    // create html table as a board
+    for (var row=0; row < rules.map.length; row++) {
+        var rowElement = $('<tr>');
+        boardElement.append(rowElement);
+        for (var col=0; col < rules.map[row].length; col++) {  
+            
+            
+            
+            var cls = "street";
+            if (rules.map[row][col] === 1) {
+                cls = "rooftop";
+            }
+            if (rules.map[row][col] === 2) {
+                cls = "finish";
+            }
+            
+            rowElement.append('<td class="'+cls+'" id="board-'+row+'-'+col+'">&nbsp;</td>');
+        }
+    }
+    
     $('<div id="play-area-'+ my_idx +'">').appendTo('#my-play');
+    $('#my-play').append(boardElement);
     
     res_init($("#my-resources"));
     //$('#my-resources').find("[data-resource=food]")
@@ -66,6 +91,39 @@ socket.on('Game over', function() {
     $('#game').hide();
     $('#gameover').show();
 });
+
+socket.on('game state', function(state) {
+    console.log("Game state received!", state);
+    
+    // clear board
+    for (var row=0; row < rules.map.length; row++) {
+        for (var col=0; col < rules.map[row].length; col++) {  
+            $('#board-'+row+'-'+col).html('&nbsp;');
+        }
+    }
+    
+    _(state.guards).each(function(g) {
+        $('#board-'+g.y+'-'+g.x).html("G");
+    });
+    
+    _(state.people).each(function(p) {
+        var e = $('#board-'+p.y+'-'+p.x);
+        
+        var c = "P";
+        if (p.assassin) {
+            if (p.uncovered) {
+                c = "A";
+            } else {
+                c = "P(A)";
+            }
+        }
+        e.html(c);
+    });
+    
+    $('#board-'+state.king.y+'-'+state.king.x).html("K");
+    
+});
+
 
 socket.on('winner', function(winner_id) {
     console.log('winner');

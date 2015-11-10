@@ -56,6 +56,23 @@ body {
     clear: both;
 }
 
+table.board td {
+    width: 80px;
+    line-height: 40px;
+    margin: 0px;
+    padding: 20px 0px;
+    border: 1px #ddd solid;
+    text-align: center;
+}
+
+.rooftop {
+    background: #E8D2A9;
+}
+
+.finish {
+    background: #A9E8AB;
+}
+
 #my-turn-indicator, #other-turn-indicator {
     position: fixed;
     top: 40px;
